@@ -478,6 +478,7 @@ GameObject:
   - component: {fileID: 1886759879}
   - component: {fileID: 1886759878}
   - component: {fileID: 1886759877}
+  - component: {fileID: 1886759881}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -562,6 +563,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1886759881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1886759876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 929d903b719de40c388531da511ebbcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  url: https://vision.googleapis.com/v1/images:annotate?key=
+  apiKey: AIzaSyBoLcUoReUdZpUkhnnWVlnKjWQhnqmFAd8
+  captureIntervalSeconds: 5
+  requestedWidth: 640
+  requestedHeight: 480
+  featureType: 3
+  maxResults: 10
 --- !u!1 &2142784305
 GameObject:
   m_ObjectHideFlags: 0
@@ -661,6 +680,7 @@ MonoBehaviour:
   cam: {fileID: 887146751}
   rt: {fileID: 887146749}
   scan: {fileID: 1282293137}
+  up: {fileID: 1886759881}
 --- !u!114 &2142784311
 MonoBehaviour:
   m_ObjectHideFlags: 0

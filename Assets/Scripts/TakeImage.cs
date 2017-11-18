@@ -8,6 +8,7 @@ public class TakeImage : MonoBehaviour
     public CameraController cam;
     public RectTransform rt;
     public GameObject scan;
+    public Upload up;
 
     bool shrunk = false;
     bool moving = false;
@@ -16,7 +17,32 @@ public class TakeImage : MonoBehaviour
     {
         LeanTween.color(scan.transform as RectTransform, Color.white, 0.5f);
         LeanTween.moveLocalY(scan, -800, 1f).setLoopCount(4).setLoopType(LeanTweenType.pingPong);
-        StartCoroutine(SendRequest(""));
+
+        StartCoroutine(up.Capture(cam.Capture().EncodeToJPG(), (Upload.AnnotateImageResponses res) =>
+        {
+            foreach (var response in res.responses)
+            {
+                foreach (var annotation in response.logoAnnotations)
+                {
+                    Debug.LogFormat("{0}: {1}%", annotation.description, annotation.score);
+                }
+            }
+
+            LeanTween.color(scan.transform as RectTransform, new Color(1, 1, 1, 0), 0.5f);
+            if (!moving)
+            {
+                moving = true;
+                LeanTween.value(gameObject, rt.sizeDelta.y, shrunk ? 0 : -500, 1f).setOnUpdate(UpdateCamera).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
+                {
+                    moving = false;
+                    //if (shrunk)
+                    //    cam.Play();
+                    //else
+                    //cam.Pause();
+                    shrunk = !shrunk;
+                });
+            }
+        }));
     }
 
     void UpdateCamera(float val)
@@ -32,22 +58,6 @@ public class TakeImage : MonoBehaviour
         //form.AddBinaryData("image", data);
         WWW www = new WWW(url, form);
         yield return www;
-        LeanTween.color(scan.transform as RectTransform, new Color(1, 1, 1, 0), 0.5f);
-        Debug.Log(www.text);
 
-        Debug.Log(rt.sizeDelta.y);
-        if (!moving)
-        {
-            moving = true;
-            LeanTween.value(gameObject, rt.sizeDelta.y, shrunk ? 0 : -500, 1f).setOnUpdate(UpdateCamera).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
-            {
-                moving = false;
-                if (shrunk)
-                    cam.Play();
-                else
-                    cam.Pause();
-                shrunk = !shrunk;
-            });
-        }
     }
 }
