@@ -71,6 +71,7 @@ public class Upload : MonoBehaviour
         public List<EntityAnnotation> logoAnnotations;
         public List<EntityAnnotation> labelAnnotations;
         public List<EntityAnnotation> textAnnotations;
+        public WebDetection webDetection;
     }
 
     [System.Serializable]
@@ -105,6 +106,20 @@ public class Upload : MonoBehaviour
         public BoundingPoly boundingPoly;
         public List<LocationInfo> locations;
         public List<Property> properties;
+    }
+
+    [System.Serializable]
+    public class WebDetection
+    {
+        public List<WebEntity> webEntities;
+    }
+
+    [System.Serializable]
+    public class WebEntity
+    {
+        public string entityId;
+        public string score;
+        public string description;
     }
 
     [System.Serializable]
@@ -227,7 +242,7 @@ public class Upload : MonoBehaviour
             Debug.LogError("No API key. Please set your API key into the \"Web Cam Texture To Cloud Vision(Script)\" component.");
     }
 
-    public IEnumerator Capture(byte[] data, System.Action<AnnotateImageResponses> onComplete)
+    public IEnumerator Capture(FeatureType type, byte[] data, System.Action<AnnotateImageResponses> onComplete)
     {
         string base64 = System.Convert.ToBase64String(data);
 
@@ -240,7 +255,7 @@ public class Upload : MonoBehaviour
         request.features = new List<Feature>();
 
         Feature feature = new Feature();
-        feature.type = this.featureType.ToString();
+        feature.type = type.ToString();
         feature.maxResults = this.maxResults;
 
         request.features.Add(feature);

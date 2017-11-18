@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class TakeImage : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class TakeImage : MonoBehaviour
     public RectTransform rt;
     public GameObject scan;
     public Upload up;
+    public Content content;
 
     bool shrunk = false;
     bool moving = false;
@@ -16,33 +18,62 @@ public class TakeImage : MonoBehaviour
     public void CaptureImage()
     {
         LeanTween.color(scan.transform as RectTransform, Color.white, 0.5f);
-        LeanTween.moveLocalY(scan, -800, 1f).setLoopCount(4).setLoopType(LeanTweenType.pingPong);
+        LeanTween.moveLocalY(scan, -800, 1f).setLoopCount(20).setLoopType(LeanTweenType.pingPong);
 
-        StartCoroutine(up.Capture(cam.Capture().EncodeToJPG(), (Upload.AnnotateImageResponses res) =>
+        if (shrunk)
+            cam.Play();
+        else
+            cam.Pause();
+
+        byte[] captured = cam.Capture().EncodeToJPG();
+
+        StartCoroutine(up.Capture(Upload.FeatureType.LOGO_DETECTION, captured, (Upload.AnnotateImageResponses res) =>
         {
-            foreach (var response in res.responses)
-            {
-                foreach (var annotation in response.logoAnnotations)
-                {
-                    Debug.LogFormat("{0}: {1}%", annotation.description, annotation.score);
-                }
-            }
+            //foreach (var response in res.responses)
+            //{
+            //    foreach (var annotation in response.logoAnnotations)
+            //    {
+            //        Debug.LogFormat("{0}: {1}%", annotation.description, annotation.score);
+            //    }
+            //}
+            Upload.EntityAnnotation logoTry = null;
+            if (res.responses.Count > 0 && res.responses.First().logoAnnotations.Count > 0) logoTry = res.responses.First().logoAnnotations.First();
 
-            LeanTween.color(scan.transform as RectTransform, new Color(1, 1, 1, 0), 0.5f);
-            if (!moving)
+            if (logoTry == null)
             {
-                moving = true;
-                LeanTween.value(gameObject, rt.sizeDelta.y, shrunk ? 0 : -500, 1f).setOnUpdate(UpdateCamera).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
+                StartCoroutine(up.Capture(Upload.FeatureType.WEB_DETECTION, captured, (Upload.AnnotateImageResponses webRes) =>
                 {
-                    moving = false;
-                    //if (shrunk)
-                    //    cam.Play();
-                    //else
-                    //cam.Pause();
-                    shrunk = !shrunk;
-                });
+                    try
+                    {
+                        content.UpdateText(webRes.responses.First().webDetection.webEntities.First().description, "test", "test");
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                    Move();
+                }));
+            }
+            else
+            {
+                content.UpdateText(logoTry.description, "test", "test");
+                Move();
             }
         }));
+    }
+
+    void Move()
+    {
+        LeanTween.color(scan.transform as RectTransform, new Color(1, 1, 1, 0), 0.5f);
+        if (!moving)
+        {
+            moving = true;
+            LeanTween.value(gameObject, rt.sizeDelta.y, shrunk ? 0 : -500, 1f).setOnUpdate(UpdateCamera).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
+            {
+                moving = false;
+                shrunk = !shrunk;
+            });
+        }
     }
 
     void UpdateCamera(float val)
