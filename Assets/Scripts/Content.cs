@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class Content : MonoBehaviour
 {
-
     public Text _name;
     public Text _author;
     public Text _content;
@@ -14,8 +13,13 @@ public class Content : MonoBehaviour
     {
         _name.text = "Name: " + name;
         _author.text = "Author: " + author;
-        _author.text = "Content: " + content;
+        _content.text = "Content: " + content;
 
         LeanTween.scaleY(gameObject, 1, 0.5f).setEase(LeanTweenType.easeOutQuint);
+    }
+
+    public void HideContent()
+    {
+        LeanTween.scaleY(gameObject, 0, 0.5f).setEase(LeanTweenType.easeOutQuint);
     }
 }

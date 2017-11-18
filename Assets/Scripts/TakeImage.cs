@@ -12,18 +12,16 @@ public class TakeImage : MonoBehaviour
     public Upload up;
     public Content content;
 
+    public ImageFind imgid;
+    public ImageInfo imginfo;
+
     bool shrunk = false;
     bool moving = false;
 
     public void CaptureImage()
     {
         LeanTween.color(scan.transform as RectTransform, Color.white, 0.5f);
-        LeanTween.moveLocalY(scan, -800, 1f).setLoopCount(20).setLoopType(LeanTweenType.pingPong);
-
-        if (shrunk)
-            cam.Play();
-        else
-            cam.Pause();
+        LeanTween.moveY(scan, -5, 1f).setLoopCount(20).setLoopType(LeanTweenType.pingPong);
 
         byte[] captured = cam.Capture().EncodeToJPG();
 
@@ -36,44 +34,53 @@ public class TakeImage : MonoBehaviour
             //        Debug.LogFormat("{0}: {1}%", annotation.description, annotation.score);
             //    }
             //}
-            Upload.EntityAnnotation logoTry = null;
-            if (res.responses.Count > 0 && res.responses.First().logoAnnotations.Count > 0) logoTry = res.responses.First().logoAnnotations.First();
 
-            if (logoTry == null)
+            imginfo = imgid.UpdateInfo(res);
+            if (imginfo != null)
             {
-                StartCoroutine(up.Capture(Upload.FeatureType.WEB_DETECTION, captured, (Upload.AnnotateImageResponses webRes) =>
-                {
-                    try
-                    {
-                        content.UpdateText(webRes.responses.First().webDetection.webEntities.First().description, "test", "test");
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                    Move();
-                }));
+                content.UpdateText(imginfo.painting_name, imginfo.author_name, imginfo.description);
             }
-            else
-            {
-                content.UpdateText(logoTry.description, "test", "test");
-                Move();
-            }
+            Move();
+
+            //Upload.EntityAnnotation logoTry = null;
+            //if (res.responses.Count > 0 && res.responses.First().logoAnnotations.Count > 0) logoTry = res.responses.First().logoAnnotations.First();
+
+            //if (logoTry == null)
+            //{
+            //    StartCoroutine(up.Capture(Upload.FeatureType.WEB_DETECTION, captured, (Upload.AnnotateImageResponses webRes) =>
+            //    {
+            //        try
+            //        {
+            //            content.UpdateText(webRes.responses.First().webDetection.webEntities.First().description, "test", "test");
+            //        }
+            //        catch (System.Exception e)
+            //        {
+            //            Debug.LogException(e);
+            //        }
+            //        Move();
+            //    }));
+            //}
+            //else
+            //{
+            //    content.UpdateText(logoTry.description, "test", "test");
+            //    Move();
+            //}
         }));
     }
 
     void Move()
     {
         LeanTween.color(scan.transform as RectTransform, new Color(1, 1, 1, 0), 0.5f);
-        if (!moving)
-        {
-            moving = true;
-            LeanTween.value(gameObject, rt.sizeDelta.y, shrunk ? 0 : -500, 1f).setOnUpdate(UpdateCamera).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
-            {
-                moving = false;
-                shrunk = !shrunk;
-            });
-        }
+        LeanTween.moveY(scan, 5, 0.5f).setOnComplete(LeanTween.cancelAll);
+        //if (!moving)
+        //{
+        //    moving = true;
+        //    LeanTween.value(gameObject, rt.sizeDelta.y, shrunk ? 0 : -1300, 1f).setOnUpdate(UpdateCamera).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
+        //    {
+        //        moving = false;
+        //        shrunk = !shrunk;
+        //    });
+        //}
     }
 
     void UpdateCamera(float val)

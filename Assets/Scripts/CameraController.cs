@@ -39,7 +39,7 @@ public class CameraController : MonoBehaviour
         }
 
         // Get the device's cameras and create WebCamTextures with them
-        device = WebCamTexture.devices.Last();
+        device = WebCamTexture.devices.First();
 
         wtex = new WebCamTexture(device.name, 10000, 10000);
 
