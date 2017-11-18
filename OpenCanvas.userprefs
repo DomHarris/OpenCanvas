@@ -1,0 +1,16 @@
+﻿<Properties StartupConfiguration="{AF298323-B90B-F3C3-7698-461D8E84C225}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/TakeImage.cs">
+    <Files>
+      <File FileName="../../Work/Caboodle/Assets/Utils/Camera/CameraController.cs" Line="108" Column="6" />
+      <File FileName="Assets/Scripts/CameraController.cs" Line="105" Column="21" />
+      <File FileName="Assets/Scripts/TakeImage.cs" Line="36" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.OpenCanvas PreferredExecutionTarget="Unity.Editor" />
+  <MultiItemStartupConfigurations />
+</Properties>
