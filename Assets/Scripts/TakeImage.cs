@@ -11,6 +11,7 @@ public class TakeImage : MonoBehaviour
     public GameObject scan;
     public Upload up;
     public Content content;
+    public Popup popup;
 
     public ImageFind imgid;
     public ImageInfo imginfo;
@@ -23,6 +24,7 @@ public class TakeImage : MonoBehaviour
         LeanTween.color(scan.transform as RectTransform, Color.white, 0.5f);
         LeanTween.moveY(scan, -5, 1f).setLoopCount(20).setLoopType(LeanTweenType.pingPong);
 
+        cam.Pause();
         byte[] captured = cam.Capture().EncodeToJPG();
 
         StartCoroutine(up.Capture(Upload.FeatureType.LOGO_DETECTION, captured, (Upload.AnnotateImageResponses res) =>
@@ -39,32 +41,27 @@ public class TakeImage : MonoBehaviour
             if (imginfo != null)
             {
                 content.UpdateText(imginfo.painting_name, imginfo.author_name, imginfo.description);
+                Move();
             }
-            Move();
+            else
+            {
+                StartCoroutine(up.Capture(Upload.FeatureType.WEB_DETECTION, captured, (Upload.AnnotateImageResponses webRes) =>
+                {
+                    imginfo = imgid.UpdateInfo(webRes, true);
+                    if (imginfo != null)
+                        content.UpdateText(imginfo.painting_name, imginfo.author_name, imginfo.description);
+                    else
+                    {
+                        if (res.responses != null && res.responses.Count > 0 && res.responses[0].logoAnnotations != null && res.responses[0].logoAnnotations.Count > 0)
+                            popup.googleSearch = res.responses[0].logoAnnotations[0].description;
+                        else
+                            popup.googleSearch = webRes.responses[0].webDetection.webEntities[0].description;
 
-            //Upload.EntityAnnotation logoTry = null;
-            //if (res.responses.Count > 0 && res.responses.First().logoAnnotations.Count > 0) logoTry = res.responses.First().logoAnnotations.First();
-
-            //if (logoTry == null)
-            //{
-            //    StartCoroutine(up.Capture(Upload.FeatureType.WEB_DETECTION, captured, (Upload.AnnotateImageResponses webRes) =>
-            //    {
-            //        try
-            //        {
-            //            content.UpdateText(webRes.responses.First().webDetection.webEntities.First().description, "test", "test");
-            //        }
-            //        catch (System.Exception e)
-            //        {
-            //            Debug.LogException(e);
-            //        }
-            //        Move();
-            //    }));
-            //}
-            //else
-            //{
-            //    content.UpdateText(logoTry.description, "test", "test");
-            //    Move();
-            //}
+                        popup.Expand();
+                    }
+                    Move();
+                }));
+            }
         }));
     }
 
